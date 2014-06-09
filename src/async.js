@@ -23,9 +23,19 @@ define(function(){
         return url + param +'='+ id;
     }
 
-    function uid() {
-        _uid += 1;
-        return '__async_req_'+ _uid +'__';
+    function parse(name) {
+        var parts = name.split(':');
+        return parts[1];
+    }
+
+    function uid(name) {
+        var glob = parse(name);
+        if(glob === undefined) {
+            _uid += 1;
+            return '__async_req_'+ _uid +'__';
+        } else {
+            return glob;
+        }
     }
 
     return{
@@ -33,10 +43,10 @@ define(function(){
             if(config.isBuild){
                 onLoad(null); //avoid errors on the optimizer
             }else{
-                var id = uid(),
-                    url = req.toUrl(name),
-                    urlArgs = config.urlArgs || '',
-                    urlArgsRe;
+                var id = uid(name);
+                var url = req.toUrl(name);
+                var urlArgs = config.urlArgs || '';
+                var urlArgsRe;
 
                 if(config.urlArgs) {
                     urlArgsRe = new RegExp('(\\?|&)' + config.urlArgs);
