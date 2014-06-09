@@ -28,9 +28,11 @@ define(['text'], function(text){
             name = name.replace(new RegExp("^[^?]*"), function(base) {
                 return base.substr(-5) === ".json" ? base : base + ".json";
             });
-            if (( config.isBuild && (config.inlineJSON === false || name.indexOf(CACHE_BUST_QUERY_PARAM +'=') !== -1)) || (req.toUrl(name).indexOf('empty:') === 0)) {
+            if ( config.isBuild && (config.inlineJSON === false || name.indexOf(CACHE_BUST_QUERY_PARAM +'=') !== -1)) {
                 //avoid inlining cache busted JSON or if inlineJSON:false
-                //and don't inline files marked as empty!
+                onLoad(null);
+            } else if ( req.toUrl(name).indexOf('empty:') === 0 ) {
+                //and don't inline files marked as empty: urls
                 onLoad(null);
             } else {
                 text.get(req.toUrl(name), function(data){
