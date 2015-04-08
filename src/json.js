@@ -37,7 +37,7 @@ define(['text'], function (text) {
                 onLoad(null);
             } else {
                 text.get(url, function (data) {
-                    var parsed;
+                    var parsed = null;
                     if (config.isBuild) {
                         buildMap[name] = data;
                         onLoad(data);
