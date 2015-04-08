@@ -37,11 +37,17 @@ define(['text'], function (text) {
                 onLoad(null);
             } else {
                 text.get(url, function (data) {
+                    var parsed;
                     if (config.isBuild) {
                         buildMap[name] = data;
                         onLoad(data);
                     } else {
-                        onLoad(jsonParse(data));
+                        try {
+                            parsed = jsonParse(data);
+                        } catch (e) {
+                            onLoad.error(e);
+                        }
+                        onLoad(parsed);
                     }
                 },
                     onLoad.error, {
