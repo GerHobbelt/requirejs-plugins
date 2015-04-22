@@ -26,14 +26,13 @@ define(['text'], function (text) {
 
     //API
     return {
-
         load: function(name, req, onLoad, config) {
             // Make sure file part of url ends with .json, add it if not
             name = name.replace(new RegExp("^[^?]*"), function(base) {
                 return base.substr(-5) === ".json" ? base : base + ".json";
             });
             var url = req.toUrl(name);
-            if (config.isBuild && (config.inlineJSON === false || name.indexOf(CACHE_BUST_QUERY_PARAM +'=') !== -1)) {
+            if (config.isBuild && (config.inlineJSON === false || name.indexOf(CACHE_BUST_QUERY_PARAM + '=') !== -1)) {
                 //avoid inlining cache busted JSON or if inlineJSON:false
                 onLoad(null);
             } else if (url.indexOf('empty:') === 0) {
@@ -42,20 +41,19 @@ define(['text'], function (text) {
             } else {
                 text.get(url, 
                     function (data) {
-                        data = data.replace(/\/\*.+?\*\/|\/\/.*(?=[\n\r])/g, '');
+                        // Need to check if the JSON data has been formatted for the JSON array security vulnerability
+                        var cleaned_data = ('' + data).replace(PROTECTION_PREFIX, '');
+                        cleaned_data = cleaned_data.replace(/\/\*.+?\*\/|\/\/[^\n\r]*/g, '');
                         var parsed = null;
-                        if (config.isBuild) {
-                            buildMap[name] = data;
-                            onLoad(data);
-                        } else {
-                            try {
-                                // Need to check if the JSON data has been formatted for the JSON array security vulnerability
-                                var cleaned_data = data.replace(PROTECTION_PREFIX, '');
-                                parsed = jsonParse(cleaned_data);
-                            } catch (e) {
-                                onLoad.error(e);
+                        try {
+                            parsed = jsonParse(cleaned_data);
+                            if (config.isBuild) {
+                                buildMap[name] = parsed;
                             }
                             onLoad(parsed);
+                        } catch (e) {
+                            onLoad.error(e);
+                            //onLoad(null);         -- should we really call onLoad???
                         }
                     },
                     onLoad.error, {
@@ -79,9 +77,8 @@ define(['text'], function (text) {
         write: function (pluginName, moduleName, write) {
             if (moduleName in buildMap) {
                 var content = buildMap[moduleName];
-                write('define("' + pluginName + '!' + moduleName + '", function () { return ' + content + '; });\n');
+                write('define("' + pluginName + '!' + moduleName + '", function () { return ' + (content ? JSON.stringify(content) : content) + '; });\n');
             }
         }
-
     };
 });
