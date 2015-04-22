@@ -29,9 +29,9 @@ define(
         //API
         return {
 
-            load : function(name, req, onLoad, config) {
+            load: function(name, req, onLoad, config) {
 //>>excludeStart('excludeMdown', pragmas.excludeMdown)
-                text.get(req.toUrl(name), function(data){
+                text.get(req.toUrl(name), function (data) {
                     data = markdownConverter.makeHtml(data);
                     if (config.isBuild) {
                         buildMap[name] = data;
@@ -44,8 +44,8 @@ define(
 
             //write method based on RequireJS official text plugin by James Burke
             //https://github.com/jrburke/requirejs/blob/master/text.js
-            write : function(pluginName, moduleName, write){
-                if(moduleName in buildMap){
+            write: function(pluginName, moduleName, write) {
+                if (moduleName in buildMap) {
                     var content = text.jsEscape(buildMap[moduleName]);
                     write.asModule(pluginName + "!" + moduleName,
                                    "define(function () { return '" +
